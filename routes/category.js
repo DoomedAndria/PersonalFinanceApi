@@ -60,12 +60,19 @@ router.put('/:id', validateCategory, async (req, res) => {
 router.delete('/:id', preventDefaultDeletion, async (req, res) => {
     try {
         const id = req.params.id
-        const catToDelete = await Category.findOne({_id: id,user: req.user._id},{})
-        if(!catToDelete){
+        //deleting
+        const deleted = await Category.findOneAndDelete({_id: id, user: req.user._id}, {})
+        if (!deleted) {
             return res.status(400).send('could not find category')
         }
-        const defCategory = await Category.findOne({user: req.user._id, isDefault: true}, {})
-        res.send(defCategory)
+        //adding finance ids to default category
+        const defCategory = await Category.findOneAndUpdate({user: req.user._id, isDefault: true}, { $addToSet: { finances: { $each: deleted.finances } } })
+        const defId = defCategory._id
+
+        //updating finances (adding default category id and pulling old category id)
+        await Finance.updateMany({categories: id,}, {$addToSet: {categories: defId}})
+        await Finance.updateMany({categories: id,}, {$pull: {categories: id}})
+        res.send(deleted)
     } catch (err) {
         res.send(err)
     }

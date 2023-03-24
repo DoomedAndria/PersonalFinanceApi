@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
 
         } else {
             //default category
-            const defCat = await Category.findOne({isDefault: true, user: req.user._id})
+            const defCat = await Category.findOne({isDefault: true, user: req.user._id},{})
             catIds = defCat._id
         }
 
@@ -36,12 +36,12 @@ router.post('/', async (req, res) => {
 
         })
 
-
+        //save finance
         const result = await finance.save()
 
-        catIds.forEach(async (id) => {
-            await Category.findByIdAndUpdate(id, {$push: {finances: result._id}})
-        })
+        //update categories whose ids were passed
+        await Category.updateMany({ _id: { $in: catIds } },{$addToSet:{finances:result._id}})
+
 
         res.send(result)
     } catch (err) {

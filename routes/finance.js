@@ -4,7 +4,10 @@ const Category = require('../models/Category')
 
 router.get('/', async (req, res) => {
     try {
+        const {sortBy} = req.query
         const result = await Finance.find({user: req.user._id}, {})
+            .sort(sortBy)
+
         res.send(result)
     } catch (err) {
         res.send(err)

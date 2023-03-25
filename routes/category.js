@@ -46,7 +46,6 @@ router.put('/:id', validateCategory, async (req, res) => {
         const id = req.params.id
         const update = {
             name: req.body.name,
-            user: req.user._id,
             updated: Date.now()
         }
         const result = await Category.findByIdAndUpdate(id, update, {new: true})

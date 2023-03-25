@@ -54,3 +54,4 @@ body:
 
 delete category
 DELETE /api/categories/{id}
+ 
